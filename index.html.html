@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Corazón Andrea</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0f0f12;
+      --text:#ff0000;
+      --text-2:#ff4d4d;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      display:grid;
+      place-items:center;
+      background: radial-gradient(1200px 800px at 50% -20%, #1a1c24 0%, var(--bg) 60%);
+      font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:white;
+    }
+
+    .wrap{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:18px;
+      padding:24px;
+    }
+
+    .heart-canvas{
+      position:relative;
+      width:min(88vw, 680px);
+      aspect-ratio:1/1;
+      max-height:80vh;
+      isolation:isolate;
+      filter: drop-shadow(0 30px 40px rgba(255, 0, 0, .2));
+      animation: heartbeat 1.6s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat{
+      0%{ transform:scale(1); }
+      20%{ transform:scale(1.06); }
+      35%{ transform:scale(1); }
+      60%{ transform:scale(1.06); }
+      100%{ transform:scale(1); }
+    }
+
+    .w{
+      position:absolute;
+      transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+      font-weight:600;
+      white-space:nowrap;
+      user-select:none;
+      pointer-events:none;
+      background: linear-gradient(180deg, var(--text), var(--text-2));
+      -webkit-background-clip:text;
+      background-clip:text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 14px rgba(255, 0, 0, .25);
+      opacity: var(--o, 0.92);
+    }
+
+    .glow{
+      position:absolute; inset:-8%;
+      border-radius:50%;
+      background: radial-gradient(50% 60% at 50% 35%, rgba(255,0,0,.25), transparent 60%),
+                  radial-gradient(60% 40% at 50% 70%, rgba(255,80,80,.14), transparent 70%);
+      filter: blur(24px);
+      z-index:-1;
+    }
+
+    .center-word{
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      font-size:clamp(28px, 5vw, 48px);
+      font-weight:700;
+      background: linear-gradient(180deg, #ff6666, #cc0000);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      text-shadow: 0 0 20px rgba(255, 0, 0, .4);
+    }
+
+    footer{
+      font-size:12px; opacity:.7
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="heart" class="heart-canvas">
+      <div class="glow" aria-hidden="true"></div>
+      <div class="center-word">Andrea</div>
+    </div>
+    <footer>Personalizado con tus propias palabras</footer>
+  </div>
+
+  <script>
+    const PALABRAS = [
+      "te quiero","mucho","corazon","me","haces muy","feliz"
+    ];
+
+    const TOTAL = 100;         // total de palabras (solo contorno)
+    const MIN_FONT = 12;       
+    const MAX_FONT = 26;       
+
+    const heart = document.getElementById('heart');
+    const rand = (a,b)=> a + Math.random()*(b-a);
+
+    function heartPoint(t){
+      const x = 16 * Math.sin(t)**3;
+      const y = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+      return {x, y};
+    }
+
+    function toPercent(p){
+      const x = (p.x + 16) / 32 * 100;
+      const y = (1 - (p.y + 17) / 30) * 100;
+      return {x, y};
+    }
+
+    function addWord(xp, yp){
+      const span = document.createElement('span');
+      span.className = 'w';
+      span.textContent = PALABRAS[Math.floor(rand(0, PALABRAS.length))];
+      span.style.left = xp + '%';
+      span.style.top = yp + '%';
+      span.style.fontSize = rand(MIN_FONT, MAX_FONT) + 'px';
+      span.style.setProperty('--r', rand(-25, 25) + 'deg');
+      span.style.setProperty('--o', rand(0.75, 1));
+      heart.appendChild(span);
+    }
+
+    // Solo dibuja palabras en el contorno
+    const borde = TOTAL; 
+    for(let i=0;i<borde;i++){
+      const t = (i/borde) * Math.PI*2;
+      const p = toPercent(heartPoint(t));
+      addWord(p.x + rand(-0.8, 0.8), p.y + rand(-0.8, 0.8));
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const setMotion = () => {
+      heart.style.animation = mediaQuery.matches ? 'none' : '';
+    };
+    mediaQuery.addEventListener('change', setMotion);
+    setMotion();
+  </script>
+</body>
+</html>
